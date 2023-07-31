@@ -28,33 +28,45 @@ done = False
 # Function definitions
 def getCellForPosition(point: list[float]):
     for cell in gameBoard:
-        if cell.collidesWith(point):
+        if cell.collidesWithPoint(point):
             return cell;
     return None
 
 # Game Loop
 while not done:
+    # If quit button was pressed, exit game loop.
     for event in pygame.event.get():
         if event.type == pygame.QUIT: done = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if isPlayerTurn and pygame.mouse.get_pressed()[0]:
-                clickedCell = getCellForPosition(pygame.mouse.get_pos());
-                if (clickedCell != None):
-                    success = clickedCell.markCell(CellMark.X)
-                    if success: isPlayerTurn = False
 
-    screen.fill(white)
     # 1. Draw Grid
+    screen.fill(white)
     for cell in gameBoard:
         #TODO: Need to fix overdraw issues.
         cell.draw(screen, black)
 
-    # 2. Determine turn
-    if (not isPlayerTurn):
-        # TODO: Process AI action.
-        isPlayerTurn = True;
+    # 2. Manage Turns
+    #TODO Refactor this
+    changeTurns = False
+    if isPlayerTurn:
+        if pygame.mouse.get_pressed()[0]:
+            clickedCell = getCellForPosition(pygame.mouse.get_pos());
+            if (clickedCell != None):
+                changeTurns = clickedCell.markCell(CellMark.X)
+    else:
+        #TODO: Process AI action.
+        if pygame.mouse.get_pressed()[0]:
+            clickedCell = getCellForPosition(pygame.mouse.get_pos());
+            if (clickedCell != None):
+                changeTurns = clickedCell.markCell(CellMark.O)
+
+    if changeTurns: isPlayerTurn = not isPlayerTurn
+
+    # if (not isPlayerTurn):
+    #     # TODO: Process AI action.
+    #     isPlayerTurn = True;
     
     # 4. Check if game is over.
+    # TODO: Should probably move the gameboard array into its own class with helpers.
     #    4a. If won, show win screen and option to restart
     #    4b. If lost, show lose screen and option to restart
     #    4c. If neither, keep playing.
