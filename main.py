@@ -1,5 +1,5 @@
-from cell import Cell
 from cell_mark import CellMark
+from game_board import GameBoard
 import pygame
 
 # Initialize pygame
@@ -7,69 +7,64 @@ pygame.init()
 
 # Setup screen
 size = width, height = 600, 600
-paddingX, paddingY = 100, 100
 screen = pygame.display.set_mode(size)
+
+white = 255,255,255
+screen.fill(white)
 
 pygame.display.set_caption("Tic Tac Toe")
 
+# Set up game clock
+clock = pygame.time.Clock()
+
+# Set up game board
+paddingX, paddingY = 100, 100
+gameBoard = GameBoard(width, height, paddingX, paddingY)
+
 # Game definitions
-white = 255,255,255
 black = 0,0,0
-# Set up the game board rect using the screen size and padding definitions.
-gameBoard = []
-cellSize = ((width - (2 * paddingX)) / 3, (height - (2 * paddingY)) / 3)
-for x in range(3):
-    for y in range(3):
-        gameBoard.append(Cell(paddingX + (x * cellSize[0]), paddingY + (y * cellSize[1]), cellSize[0], cellSize[1]));
-
 isPlayerTurn = True
+isGameOver = False
 done = False
-
-# Function definitions
-def getCellForPosition(point: list[float]):
-    for cell in gameBoard:
-        if cell.collidesWithPoint(point):
-            return cell;
-    return None
 
 # Game Loop
 while not done:
-    # If quit button was pressed, exit game loop.
+    # 0. Check if quit button was pressed.
     for event in pygame.event.get():
         if event.type == pygame.QUIT: done = True
 
-    # 1. Draw Grid
-    screen.fill(white)
-    for cell in gameBoard:
-        #TODO: Need to fix overdraw issues.
-        cell.draw(screen, black)
+    # 1. Check if game is over
+    if (isGameOver):
+        continue
 
-    # 2. Manage Turns
-    #TODO Refactor this
+    # 2. Get action for active player
     changeTurns = False
-    if isPlayerTurn:
-        if pygame.mouse.get_pressed()[0]:
-            clickedCell = getCellForPosition(pygame.mouse.get_pos());
-            if (clickedCell != None):
-                changeTurns = clickedCell.markCell(CellMark.X)
-    else:
-        #TODO: Process AI action.
-        if pygame.mouse.get_pressed()[0]:
-            clickedCell = getCellForPosition(pygame.mouse.get_pos());
-            if (clickedCell != None):
-                changeTurns = clickedCell.markCell(CellMark.O)
+    if pygame.mouse.get_pressed()[0]:
+        cellMark = CellMark.X if isPlayerTurn else CellMark.O
+        changeTurns = gameBoard.markCellAtPosition(pygame.mouse.get_pos(), cellMark)
 
     if changeTurns: isPlayerTurn = not isPlayerTurn
-
-    # if (not isPlayerTurn):
-    #     # TODO: Process AI action.
-    #     isPlayerTurn = True;
     
-    # 4. Check if game is over.
-    # TODO: Should probably move the gameboard array into its own class with helpers.
-    #    4a. If won, show win screen and option to restart
-    #    4b. If lost, show lose screen and option to restart
-    #    4c. If neither, keep playing.
+    # 3. Check game state
+    winner = gameBoard.getWinner()
+    isDraw = gameBoard.areAllCellsFilled() and winner == None
+    if isDraw:
+        print("Draw!")
+        isGameOver = True
+    elif winner == CellMark.X:
+        print("Player Won!")
+        isGameOver = True
+        # TODO: Show win screen and option to restart
+    elif winner == CellMark.O:
+        print("Opponent Won!")
+        isGameOver = True
+        # TODO: Show lose screen and option to restart
+
+    # 4. Draw Grid
+    gameBoard.draw(screen, black)
     pygame.display.flip()
+
+    # 5. Update Clock
+    clock.tick(60) # limits FPS to 60
 
 pygame.quit()
