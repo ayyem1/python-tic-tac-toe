@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import IntEnum
 
-class CellMark(Enum):
+class CellMark(IntEnum):
     EMPTY = 0
     X = 1
     O = 2

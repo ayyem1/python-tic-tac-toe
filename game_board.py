@@ -3,21 +3,16 @@ from cell_mark import CellMark
 
 import pygame
 
-class GameBoard:        
+class GameBoard:
+    NUM_ROWS = 3
+    NUM_COLUMNS = 3
+         
     def reset(self, width: float, height: float, paddingX: float, paddingY: float) -> None:
         self.cells = []
-        cellSize = ((width - (2 * paddingX)) / 3, (height - (2 * paddingY)) / 3)
-        for x in range(3):
-            for y in range(3):
+        cellSize = ((width - (2 * paddingX)) / self.NUM_COLUMNS, (height - (2 * paddingY)) / self.NUM_ROWS)
+        for x in range(self.NUM_COLUMNS):
+            for y in range(self.NUM_ROWS): 
                 self.cells.append(Cell(paddingX + (x * cellSize[0]), paddingY + (y * cellSize[1]), cellSize[0], cellSize[1]));
-    
-    def markCellAtPosition(self, position: tuple[float], cellMark: CellMark) -> bool:
-            success = False
-            clickedCell = self.getCellForPosition(position);
-            if (clickedCell != None):
-                success = clickedCell.markCell(cellMark)
-            
-            return success
     
     def getCellForPosition(self, point: tuple[float]) -> Cell:
         for cell in self.cells:
@@ -26,41 +21,41 @@ class GameBoard:
     
     def draw(self, screen, color: tuple[int]) -> None:
         # Draw vertical lines for board
-        pygame.draw.aaline(screen, color, self.cells[3].bounds.topleft, self.cells[5].bounds.bottomleft, 1)
-        pygame.draw.aaline(screen, color, self.cells[3].bounds.topright, self.cells[5].bounds.bottomright, 1)
+        for c in range(self.NUM_COLUMNS - 1):
+            pygame.draw.aaline(screen, color, self.cells[c * self.NUM_ROWS].bounds.topright, self.cells[(c * self.NUM_ROWS) + (self.NUM_ROWS - 1)].bounds.bottomright, 1)
 
         # Draw horizontal lines for board
-        pygame.draw.aaline(screen, color, self.cells[1].bounds.topleft, self.cells[7].bounds.topright, 1)
-        pygame.draw.aaline(screen, color, self.cells[1].bounds.bottomleft, self.cells[7].bounds.bottomright, 1)
+        for r in range(self.NUM_ROWS - 1):
+            pygame.draw.aaline(screen, color, self.cells[r].bounds.bottomleft, self.cells[r + self.NUM_ROWS * (self.NUM_COLUMNS - 1)].bounds.bottomright, 1)
 
-        # Draw each cell's mark, if it exists.
+        # Draw each cell's marker, if it exists.
         for cell in self.cells:
             cell.draw(screen, color)
     
+    # TODO: Make this generic
     def getWinner(self) -> CellMark:
         # Check Columns
-        if (self.cells[0].mark == self.cells[1].mark and self.cells[0].mark == self.cells[2].mark):
-            return self.cells[0].mark
-        elif (self.cells[3].mark == self.cells[4].mark and self.cells[3].mark == self.cells[5].mark):
-            return self.cells[3].mark
-        elif (self.cells[6].mark == self.cells[7].mark and self.cells[6].mark == self.cells[8].mark):
-            return self.cells[6].mark
+        if self.cells[0].marker == self.cells[1].marker == self.cells[2].marker:
+            return self.cells[0].marker
+        elif self.cells[3].marker == self.cells[4].marker == self.cells[5].marker:
+            return self.cells[3].marker
+        elif self.cells[6].marker == self.cells[7].marker == self.cells[8].marker:
+            return self.cells[6].marker
         # Check Rows
-        elif (self.cells[0].mark == self.cells[3].mark and self.cells[0].mark == self.cells[6].mark):
-            return self.cells[0].mark
-        elif (self.cells[1].mark == self.cells[4].mark and self.cells[1].mark == self.cells[7].mark):
-            return self.cells[1].mark
-        elif (self.cells[2].mark == self.cells[5].mark and self.cells[2].mark == self.cells[8].mark):
-            return self.cells[2].mark
+        elif self.cells[0].marker == self.cells[3].marker == self.cells[6].marker:
+            return self.cells[0].marker
+        elif self.cells[1].marker == self.cells[4].marker == self.cells[7].marker:
+            return self.cells[1].marker
+        elif self.cells[2].marker == self.cells[5].marker == self.cells[8].marker:
+            return self.cells[2].marker
         # Check Diagonals
-        elif (self.cells[0].mark == self.cells[4].mark and self.cells[0].mark == self.cells[8].mark):
-            return self.cells[0].mark
-        elif (self.cells[2].mark == self.cells[4].mark and self.cells[2].mark  == self.cells[6].mark):
-            return self.cells[2].mark
+        elif self.cells[0].marker == self.cells[4].marker == self.cells[8].marker:
+            return self.cells[0].marker
+        elif self.cells[2].marker == self.cells[4].marker == self.cells[6].marker:
+            return self.cells[2].marker
     
     def areAllCellsFilled(self) -> bool:
-        for cell in self.cells:
-            if (cell.isMarkEmpty()):
-                return False
-            
-        return True
+        return len(self.getCellsWithMark(CellMark.EMPTY)) == 0
+    
+    def getCellsWithMark(self, marker: CellMark) -> list[Cell]:
+        return list(filter(lambda cell: cell.marker == marker, self.cells))

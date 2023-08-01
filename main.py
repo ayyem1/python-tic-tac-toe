@@ -1,5 +1,7 @@
+from ai_player import AIPlayer
 from cell_mark import CellMark
 from game_board import GameBoard
+from player import Player
 import pygame
 
 # Initialize pygame
@@ -15,8 +17,11 @@ pygame.display.set_caption("Tic Tac Toe")
 clock = pygame.time.Clock()
 
 # Set up game board
-paddingX, paddingY = 100, 100
 gameBoard = GameBoard()
+
+# Set up players
+player = Player(CellMark.X)
+opponent = AIPlayer(CellMark.O)
 
 # Color definitions
 green = (0, 255, 0)
@@ -26,8 +31,19 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 
 # Game definitions
+def getActivePlayer() -> Player:
+    playerMarkerCount = len(gameBoard.getCellsWithMark(player.playerMarker))
+    opponentMarkerCount = len(gameBoard.getCellsWithMark(opponent.playerMarker))
+    if playerMarkerCount > opponentMarkerCount:
+        return opponent
+    else:
+        return player
+
 def resetGame() -> None:
+    global paddingX, paddingY 
+    paddingX, paddingY = 100, 100
     gameBoard.reset(width, height, paddingX, paddingY)
+
     global gameOverFont
     gameOverFont = pygame.font.Font('freesansbold.ttf', 40)
 
@@ -40,9 +56,6 @@ def resetGame() -> None:
     global gameOverText;
     gameOverText = None
 
-    global isPlayerTurn
-    isPlayerTurn = True
-
     global isGameOver
     isGameOver = False
 
@@ -50,9 +63,6 @@ def resetGame() -> None:
     done = False
 
 resetGame()
-
-#TODO: Create AI for opponent
-#TODO: Add comments to code.
 
 # Game Loop
 while not done:
@@ -67,22 +77,19 @@ while not done:
     if (isGameOver):
         continue
 
-    # 2. Get action for active player and manage turn.
-    if pygame.mouse.get_pressed()[0]:
-        cellMark = CellMark.X if isPlayerTurn else CellMark.O
-        if gameBoard.markCellAtPosition(pygame.mouse.get_pos(), cellMark):
-            isPlayerTurn = not isPlayerTurn
-    
+    # 2. Get action for active player.
+    getActivePlayer().doMove(gameBoard)
+
     # 3. Check game state
     winner = gameBoard.getWinner()
     isDraw = gameBoard.areAllCellsFilled() and winner == None
     if isDraw:
         gameOverText = gameOverFont.render('Draw', True, blue)
         isGameOver = True
-    elif winner == CellMark.X:
+    elif winner == player.playerMarker:
         gameOverText = gameOverFont.render('Win!', True, green)
         isGameOver = True
-    elif winner == CellMark.O:
+    elif winner == opponent.playerMarker:
         gameOverText = gameOverFont.render('Lose!', True, red)
         isGameOver = True
 

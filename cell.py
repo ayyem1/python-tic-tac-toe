@@ -4,24 +4,24 @@ import pygame
 class Cell:
     def __init__(self, start, end, width, height) -> None:
         self.bounds = pygame.Rect(start, end, width, height)
-        self.mark = CellMark.EMPTY
+        self.marker = CellMark.EMPTY
     
     def isMarkEmpty(self) -> bool:
-        return self.mark == CellMark.EMPTY
+        return self.marker == CellMark.EMPTY
     
-    def markCell(self, cellMark: CellMark) -> bool:
+    def mark(self, cellMark: CellMark) -> bool:
         if not self.isMarkEmpty():
             return False
-        self.mark = cellMark
+        self.marker = cellMark
         return True
     
     def collidesWithPoint(self, point: tuple[float]) -> bool:
         return self.bounds.collidepoint(point[0], point[1])
     
     def draw(self, screen, color: tuple[int]) -> None:
-        if self.mark == CellMark.X:
+        if self.marker == CellMark.X:
             self.drawX(screen, color)
-        elif self.mark == CellMark.O:
+        elif self.marker == CellMark.O:
             self.drawO(screen, color)
     
     def drawX(self, screen, color: tuple[int]) -> None:
