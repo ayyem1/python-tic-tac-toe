@@ -58,22 +58,20 @@ resetGame()
 while not done:
     # 0. Check if quit button was pressed.
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: done = True
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_r:
-                resetGame()
+        if event.type == pygame.QUIT:
+            done = True
+        if event.type == pygame.KEYUP and event.key == pygame.K_r:
+            resetGame()
 
     # 1. Check if game is over
     if (isGameOver):
         continue
 
-    # 2. Get action for active player
-    changeTurns = False
+    # 2. Get action for active player and manage turn.
     if pygame.mouse.get_pressed()[0]:
         cellMark = CellMark.X if isPlayerTurn else CellMark.O
-        changeTurns = gameBoard.markCellAtPosition(pygame.mouse.get_pos(), cellMark)
-
-    if changeTurns: isPlayerTurn = not isPlayerTurn
+        if gameBoard.markCellAtPosition(pygame.mouse.get_pos(), cellMark):
+            isPlayerTurn = not isPlayerTurn
     
     # 3. Check game state
     winner = gameBoard.getWinner()
