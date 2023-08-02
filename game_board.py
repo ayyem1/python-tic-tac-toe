@@ -1,9 +1,13 @@
 from cell import Cell
 from cell_mark import CellMark
+from idrawable import IDrawable
 
 import pygame
 
-class GameBoard:
+"""
+Represents the state of the game and has logic to render its state.
+"""
+class GameBoard(IDrawable):
     NUM_ROWS = 3
     NUM_COLUMNS = 3
          
@@ -14,23 +18,14 @@ class GameBoard:
             for y in range(self.NUM_ROWS): 
                 self.cells.append(Cell(paddingX + (x * cellSize[0]), paddingY + (y * cellSize[1]), cellSize[0], cellSize[1]));
     
-    def getCellForPosition(self, point: tuple[float]) -> Cell:
+    def markCellAtPosition(self, position: tuple[float], marker: CellMark) -> bool:
         for cell in self.cells:
-            if cell.collidesWithPoint(point): return cell
-        return None
+            if cell.bounds.collidepoint(position[0], position[1]):
+                return self.markCell(cell, marker)
+        return False
     
-    def draw(self, screen, color: tuple[int]) -> None:
-        # Draw vertical lines for board
-        for c in range(self.NUM_COLUMNS - 1):
-            pygame.draw.aaline(screen, color, self.cells[c * self.NUM_ROWS].bounds.topright, self.cells[(c * self.NUM_ROWS) + (self.NUM_ROWS - 1)].bounds.bottomright, 1)
-
-        # Draw horizontal lines for board
-        for r in range(self.NUM_ROWS - 1):
-            pygame.draw.aaline(screen, color, self.cells[r].bounds.bottomleft, self.cells[r + self.NUM_ROWS * (self.NUM_COLUMNS - 1)].bounds.bottomright, 1)
-
-        # Draw each cell's marker, if it exists.
-        for cell in self.cells:
-            cell.draw(screen, color)
+    def markCell(self, cellToMark: Cell, marker: CellMark) -> bool:
+        return cellToMark.mark(marker)
     
     # TODO: Make this generic
     def getWinner(self) -> CellMark:
@@ -54,8 +49,22 @@ class GameBoard:
         elif self.cells[2].marker == self.cells[4].marker == self.cells[6].marker:
             return self.cells[2].marker
     
-    def areAllCellsFilled(self) -> bool:
-        return len(self.getCellsWithMark(CellMark.EMPTY)) == 0
+    def isBoardFilled(self) -> bool:
+        return len(self.getAllCellsWithMark(CellMark.EMPTY)) == 0
     
-    def getCellsWithMark(self, marker: CellMark) -> list[Cell]:
+    def getAllCellsWithMark(self, marker: CellMark) -> list[Cell]:
         return list(filter(lambda cell: cell.marker == marker, self.cells))
+    
+    # IDrawable implementation
+    def draw(self, screen, color: tuple[int]) -> None:
+        # Draw vertical lines for board
+        for c in range(self.NUM_COLUMNS - 1):
+            pygame.draw.aaline(screen, color, self.cells[c * self.NUM_ROWS].bounds.topright, self.cells[(c * self.NUM_ROWS) + (self.NUM_ROWS - 1)].bounds.bottomright, 1)
+
+        # Draw horizontal lines for board
+        for r in range(self.NUM_ROWS - 1):
+            pygame.draw.aaline(screen, color, self.cells[r].bounds.bottomleft, self.cells[r + self.NUM_ROWS * (self.NUM_COLUMNS - 1)].bounds.bottomright, 1)
+
+        # Draw each cell's marker, if it exists.
+        for cell in self.cells:
+            cell.draw(screen, color)

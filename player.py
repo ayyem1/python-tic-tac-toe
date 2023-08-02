@@ -3,6 +3,9 @@ from game_board import GameBoard
 
 import pygame
 
+"""
+Represents a player whose moves are controlled via user input.
+"""
 class Player:
     def __init__(self, playerMarker: CellMark) -> None:
         self.playerMarker = playerMarker
@@ -10,7 +13,5 @@ class Player:
     def doMove(self, gameBoard: GameBoard) -> bool:
         result = False
         if pygame.mouse.get_pressed()[0]:
-            clickedCell = gameBoard.getCellForPosition(pygame.mouse.get_pos())
-            if (clickedCell != None):
-                result = clickedCell.mark(self.playerMarker)
+            result = gameBoard.markCellAtPosition(pygame.mouse.get_pos(), self.playerMarker)
         return result

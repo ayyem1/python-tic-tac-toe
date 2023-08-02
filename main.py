@@ -1,114 +1,29 @@
-from ai_player import AIPlayer
-from cell_mark import CellMark
-from game_board import GameBoard
-from player import Player
+from game import Game
 import pygame
 
-# Initialize pygame
-pygame.init()
-
-# Setup screen
-size = width, height = 600, 600
-screen = pygame.display.set_mode(size)
-
-pygame.display.set_caption("Tic Tac Toe")
+# Create new game instance
+game = Game()
 
 # Set up game clock
 clock = pygame.time.Clock()
 
-# Set up game board
-gameBoard = GameBoard()
-
-# Set up players
-player = Player(CellMark.X)
-opponent = AIPlayer(CellMark.O)
-
-# Color definitions
-green = (0, 255, 0)
-red = (255, 0, 0)
-blue = (0, 0, 255)
-white = (255, 255, 255)
-black = (0, 0, 0)
-
-# Game definitions
-def getActivePlayer() -> Player:
-    playerMarkerCount = len(gameBoard.getCellsWithMark(player.playerMarker))
-    opponentMarkerCount = len(gameBoard.getCellsWithMark(opponent.playerMarker))
-    if playerMarkerCount > opponentMarkerCount:
-        return opponent
-    else:
-        return player
-
-def resetGame() -> None:
-    global paddingX, paddingY 
-    paddingX, paddingY = 100, 100
-    gameBoard.reset(width, height, paddingX, paddingY)
-
-    global gameOverFont
-    gameOverFont = pygame.font.Font('freesansbold.ttf', 40)
-
-    global infoFont
-    infoFont = pygame.font.Font('freesansbold.ttf', 16)
-
-    global infoText
-    infoText = infoFont.render('(Press \'r\' at any point to restart)', True, black)
-
-    global gameOverText;
-    gameOverText = None
-
-    global isGameOver
-    isGameOver = False
-
-    global done
-    done = False
-
-resetGame()
-
+done = False
 # Game Loop
 while not done:
-    # 0. Check if quit button was pressed.
+    # Handle user input for quitting and refreshing game
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.KEYUP and event.key == pygame.K_r:
-            resetGame()
+            game.resetGame()
 
-    # 1. Check if game is over
-    if (isGameOver):
-        continue
+    game.nextTurn()
 
-    # 2. Get action for active player.
-    getActivePlayer().doMove(gameBoard)
+    game.render()
 
-    # 3. Check game state
-    winner = gameBoard.getWinner()
-    isDraw = gameBoard.areAllCellsFilled() and winner == None
-    if isDraw:
-        gameOverText = gameOverFont.render('Draw', True, blue)
-        isGameOver = True
-    elif winner == player.playerMarker:
-        gameOverText = gameOverFont.render('Win!', True, green)
-        isGameOver = True
-    elif winner == opponent.playerMarker:
-        gameOverText = gameOverFont.render('Lose!', True, red)
-        isGameOver = True
-
-    # 4. Render
-    screen.fill(white)
-
-    if (isGameOver):
-        gameOverTextRect = gameOverText.get_rect()
-        gameOverTextRect.center = (width / 2, paddingY / 2)
-        screen.blit(gameOverText, gameOverTextRect)
-    
-    infoTextRect = infoText.get_rect()
-    infoTextRect.center = (width / 2, height - (paddingY / 2))
-    screen.blit(infoText, infoTextRect)
-
-    gameBoard.draw(screen, black)
     pygame.display.flip()
 
-    # 5. Update Clock
-    clock.tick(60) # limits FPS to 60
+    # Limit FPS to 60
+    clock.tick(60)
 
 pygame.quit()

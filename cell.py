@@ -1,7 +1,11 @@
 from cell_mark import CellMark
+from idrawable import IDrawable
 import pygame
 
-class Cell:
+"""
+Represents a single cell on the game board and has logic to render its state.
+"""
+class Cell(IDrawable):
     def __init__(self, start, end, width, height) -> None:
         self.bounds = pygame.Rect(start, end, width, height)
         self.marker = CellMark.EMPTY
@@ -15,9 +19,8 @@ class Cell:
         self.marker = cellMark
         return True
     
-    def collidesWithPoint(self, point: tuple[float]) -> bool:
-        return self.bounds.collidepoint(point[0], point[1])
-    
+    #region IDrawable implementation
+
     def draw(self, screen, color: tuple[int]) -> None:
         if self.marker == CellMark.X:
             self.drawX(screen, color)
@@ -33,4 +36,4 @@ class Cell:
         pygame.draw.circle(screen, color, self.bounds.center, self.bounds.width / 2, 1)
         return
     
-
+    #endregion
