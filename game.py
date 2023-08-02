@@ -32,19 +32,18 @@ class Game:
         self.infoFont = pygame.font.Font('freesansbold.ttf', 16)
         self.infoText = self.infoFont.render('(Press \'r\' at any point to restart)', True, self.BLACK)
 
-        self.gameBoard = GameBoard()
+        self.gameBoard = GameBoard(self.SCREENSIZE, self.PADDING)
         self.player = Player(CellMark.X)
         self.opponent = AIPlayer(CellMark.O)
 
         self.resetGame()
 
     def getActivePlayer(self) -> Player:
-        playerMarkerCount = len(self.gameBoard.getAllCellsWithMark(self.player.playerMarker))
-        opponentMarkerCount = len(self.gameBoard.getAllCellsWithMark(self.opponent.playerMarker))
-        if playerMarkerCount > opponentMarkerCount:
-            return self.opponent
-        else:
+        lesserMark = self.gameBoard.getLesserMark()
+        if (lesserMark == self.player.playerMarker):
             return self.player
+        else:
+            return self.opponent
     
     def nextTurn(self) -> None:
         if self.isOver: return
@@ -66,7 +65,7 @@ class Game:
     
         
     def resetGame(self) -> None:
-        self.gameBoard.reset(self.SCREENSIZE[0], self.SCREENSIZE[1], self.PADDING[0], self.PADDING[1])
+        self.gameBoard.reset()
         self.gameOverText = None
         self.isOver = False
 
