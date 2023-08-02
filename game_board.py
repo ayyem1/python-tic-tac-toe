@@ -8,14 +8,14 @@ import pygame
 Represents the state of the game and has logic to render its state.
 """
 class GameBoard(IDrawable):
-    NUM_ROWS = 3
-    NUM_COLUMNS = 3
-         
+    # NOTE: The game enforces equality of number of rows and columns.
+    DIMENSION = 3
+
     def reset(self, width: float, height: float, paddingX: float, paddingY: float) -> None:
         self.cells = []
-        cellSize = ((width - (2 * paddingX)) / self.NUM_COLUMNS, (height - (2 * paddingY)) / self.NUM_ROWS)
-        for x in range(self.NUM_COLUMNS):
-            for y in range(self.NUM_ROWS): 
+        cellSize = ((width - (2 * paddingX)) / self.DIMENSION, (height - (2 * paddingY)) / self.DIMENSION)
+        for x in range(self.DIMENSION):
+            for y in range(self.DIMENSION): 
                 self.cells.append(Cell(paddingX + (x * cellSize[0]), paddingY + (y * cellSize[1]), cellSize[0], cellSize[1]));
     
     def markCellAtPosition(self, position: tuple[float], marker: CellMark) -> bool:
@@ -27,27 +27,43 @@ class GameBoard(IDrawable):
     def markCell(self, cellToMark: Cell, marker: CellMark) -> bool:
         return cellToMark.mark(marker)
     
-    # TODO: Make this generic
+    # NOTE: This is not as efficient as hard-coding the 8 checks for a 3x3
+    # tic-tac-toe game, but it allows us the flexibility to have an NxN
+    # tic-tac-toe game 
     def getWinner(self) -> CellMark:
         # Check Columns
-        if self.cells[0].marker == self.cells[1].marker == self.cells[2].marker:
-            return self.cells[0].marker
-        elif self.cells[3].marker == self.cells[4].marker == self.cells[5].marker:
-            return self.cells[3].marker
-        elif self.cells[6].marker == self.cells[7].marker == self.cells[8].marker:
-            return self.cells[6].marker
+        for i in range(self.DIMENSION):
+            columnIndices = range(i * self.DIMENSION, (i * self.DIMENSION) + self.DIMENSION)
+            targetMarker = self.cells[columnIndices[0]].marker
+            if targetMarker != CellMark.EMPTY and self.areCellsMatching(columnIndices):
+                return targetMarker
+
         # Check Rows
-        elif self.cells[0].marker == self.cells[3].marker == self.cells[6].marker:
-            return self.cells[0].marker
-        elif self.cells[1].marker == self.cells[4].marker == self.cells[7].marker:
-            return self.cells[1].marker
-        elif self.cells[2].marker == self.cells[5].marker == self.cells[8].marker:
-            return self.cells[2].marker
-        # Check Diagonals
-        elif self.cells[0].marker == self.cells[4].marker == self.cells[8].marker:
-            return self.cells[0].marker
-        elif self.cells[2].marker == self.cells[4].marker == self.cells[6].marker:
-            return self.cells[2].marker
+        for j in range(self.DIMENSION):
+            rowIndices = list(filter(lambda index: index % self.DIMENSION == j, range(j, j + self.DIMENSION * self.DIMENSION)))
+            targetMarker = self.cells[rowIndices[0]].marker
+            if targetMarker != CellMark.EMPTY and self.areCellsMatching(rowIndices):
+                return targetMarker
+
+        firstDiagonalIndices = list(map(lambda index: index + index * self.DIMENSION, range(self.DIMENSION)))
+        targetMarker = self.cells[firstDiagonalIndices[0]].marker
+        if targetMarker != CellMark.EMPTY and self.areCellsMatching(firstDiagonalIndices):
+            return targetMarker
+        
+        secondDiagonalIndices = range(self.DIMENSION - 1, self.DIMENSION * (self.DIMENSION - 1) + 1, self.DIMENSION - 1)
+        targetMarker = self.cells[secondDiagonalIndices[0]].marker
+        if targetMarker != CellMark.EMPTY and self.areCellsMatching(secondDiagonalIndices):
+            return targetMarker
+            
+        return None
+    
+    def areCellsMatching(self, cellIndices: list[int]) -> bool:
+        marker = self.cells[cellIndices[0]].marker
+        for cellIndex in cellIndices:
+            if self.cells[cellIndex].marker != marker:
+                return False
+        
+        return True
     
     def isBoardFilled(self) -> bool:
         return len(self.getAllCellsWithMark(CellMark.EMPTY)) == 0
@@ -58,12 +74,12 @@ class GameBoard(IDrawable):
     # IDrawable implementation
     def draw(self, screen, color: tuple[int]) -> None:
         # Draw vertical lines for board
-        for c in range(self.NUM_COLUMNS - 1):
-            pygame.draw.aaline(screen, color, self.cells[c * self.NUM_ROWS].bounds.topright, self.cells[(c * self.NUM_ROWS) + (self.NUM_ROWS - 1)].bounds.bottomright, 1)
+        for c in range(self.DIMENSION - 1):
+            pygame.draw.aaline(screen, color, self.cells[c * self.DIMENSION].bounds.topright, self.cells[(c * self.DIMENSION) + (self.DIMENSION - 1)].bounds.bottomright, 1)
 
         # Draw horizontal lines for board
-        for r in range(self.NUM_ROWS - 1):
-            pygame.draw.aaline(screen, color, self.cells[r].bounds.bottomleft, self.cells[r + self.NUM_ROWS * (self.NUM_COLUMNS - 1)].bounds.bottomright, 1)
+        for r in range(self.DIMENSION - 1):
+            pygame.draw.aaline(screen, color, self.cells[r].bounds.bottomleft, self.cells[r + self.DIMENSION * (self.DIMENSION - 1)].bounds.bottomright, 1)
 
         # Draw each cell's marker, if it exists.
         for cell in self.cells:
