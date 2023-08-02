@@ -11,4 +11,4 @@ Python 3.9.6
 
 ## Install instructions
 1. Download Repository and navigate to the directory that contains main.py
-2. Run 'python3 main.py'
+2. Run `python3 main.py`
