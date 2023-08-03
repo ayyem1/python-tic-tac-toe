@@ -15,6 +15,10 @@ Python 3.9.6
 3. Win/Lose/Draw text is show on game over
 4. You can restart the game at any time using the 'r' key on your keyboard
 
+## Future Additions
+1. Optimize minmax with AB pruning
+2. Add GUI option to select AI difficulty
+
 ## Install instructions
 1. Download Repository and navigate to the directory that contains main.py
 2. Run `python3 main.py`
