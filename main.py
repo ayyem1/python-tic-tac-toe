@@ -1,8 +1,21 @@
 from game import Game
 import pygame
 
+# Init pygame
+pygame.init()
+
+# Setup screen
+SCREENSIZE = (600, 600)
+PADDING = (100, 100)
+screen = pygame.display.set_mode(SCREENSIZE)
+pygame.display.set_caption("Tic Tac Toe")
+
+# Create Fonts
+infoFont = pygame.font.Font('freesansbold.ttf', 16)
+gameOverFont = pygame.font.Font('freesansbold.ttf', 40)
+
 # Create new game instance
-game = Game()
+game = Game(SCREENSIZE, PADDING)
 
 # Set up game clock
 clock = pygame.time.Clock()
@@ -19,7 +32,7 @@ while not done:
 
     game.nextTurn()
 
-    game.render()
+    game.render(screen, gameOverFont, infoFont)
 
     pygame.display.flip()
 

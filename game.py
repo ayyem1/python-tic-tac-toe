@@ -4,8 +4,6 @@ from game_board import GameBoard
 from idrawable import IDrawable
 from player import Player
 
-import pygame
-
 """
 Represents a game of tic tac toe. 
 Handles managing player turns and capturing user input to update game state.
@@ -17,22 +15,11 @@ class Game:
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
 
-    SCREENSIZE = (600, 600)
-    PADDING = (100, 100)
+    def __init__(self, screenSize: tuple[float], padding: tuple[float]) -> None:
+        self.screenSize = screenSize
+        self.padding = padding
 
-    def __init__(self) -> None:
-        pygame.init()
-
-        self.screen = pygame.display.set_mode(self.SCREENSIZE)
-        pygame.display.set_caption("Tic Tac Toe")
-
-        self.gameOverFont = pygame.font.Font('freesansbold.ttf', 40)
-        self.gameOverText = None
-
-        self.infoFont = pygame.font.Font('freesansbold.ttf', 16)
-        self.infoText = self.infoFont.render('(Press \'r\' at any point to restart)', True, self.BLACK)
-
-        self.gameBoard = GameBoard(self.SCREENSIZE, self.PADDING)
+        self.gameBoard = GameBoard(self.screenSize, self.padding)
         self.player = Player(CellMark.X)
         self.opponent = AIPlayer(CellMark.O)
 
@@ -54,32 +41,41 @@ class Game:
         winner = self.gameBoard.getWinner()
         isDraw = self.gameBoard.isBoardFilled() and winner == None
         if isDraw:
-            self.gameOverText = self.gameOverFont.render('Draw', True, self.BLUE)
             self.isOver = True
         elif winner == self.player.playerMarker:
-            self.gameOverText = self.gameOverFont.render('Win!', True, self.GREEN)
+            self.winner = self.player.playerMarker
             self.isOver = True
         elif winner == self.opponent.playerMarker:
-            self.gameOverText = self.gameOverFont.render('Lose!', True, self.RED)
+            self.winner = self.opponent.playerMarker
             self.isOver = True
-    
         
     def resetGame(self) -> None:
         self.gameBoard.reset()
-        self.gameOverText = None
         self.isOver = False
+        self.winner = CellMark.EMPTY
 
-    def render(self) -> None:
-        self.screen.fill(self.WHITE)
-        self.gameBoard.draw(self.screen, self.BLACK)
+    def render(self, screen, gameOverFont, infoFont) -> None:
+        infoText = infoFont.render('(Press \'r\' at any point to restart)', True, self.BLACK)
 
-        infoTextRect = self.infoText.get_rect()
-        infoTextRect.center = (self.SCREENSIZE[0] / 2, self.SCREENSIZE[1] - (self.PADDING[1] / 2))
-        self.screen.blit(self.infoText, infoTextRect)
+        screen.fill(self.WHITE)
+        self.gameBoard.draw(screen, self.BLACK)
+
+        infoTextRect = infoText.get_rect()
+        infoTextRect.center = (self.screenSize[0] / 2, self.screenSize[1] - (self.padding[1] / 2))
+        screen.blit(infoText, infoTextRect)
 
         if (self.isOver):
-            gameOverTextRect = self.gameOverText.get_rect()
-            gameOverTextRect.center = (self.SCREENSIZE[0] / 2, self.PADDING[1] / 2)
-            self.screen.blit(self.gameOverText, gameOverTextRect)
+            gameOverText = None
+            if self.winner == CellMark.EMPTY:
+                gameOverText = gameOverFont.render('Draw', True, self.BLUE)
+            elif self.winner == self.player.playerMarker:
+                gameOverText = gameOverFont.render('Win!', True, self.GREEN)
+            else:
+                gameOverText = gameOverFont.render('Lose!', True, self.RED)
+
+
+            gameOverTextRect = gameOverText.get_rect()
+            gameOverTextRect.center = (self.screenSize[0] / 2, self.padding[1] / 2)
+            screen.blit(gameOverText, gameOverTextRect)
     
  

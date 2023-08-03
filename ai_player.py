@@ -36,29 +36,18 @@ class AIPlayer(Player):
         # Simulate first level for simplicity and let simulateMinMax() handle the rest.
         for i in range(len(gameBoard.cells)):
             if not gameBoard.cells[i].isMarkEmpty(): continue
-            simulatedBoard = self.createBoardWithSimulatedMove(gameBoard, i)
-            moveScorePairs.append((i, self.simulateMinMax(simulatedBoard, 1)))
+            # Mark board with candidate move
+            gameBoard.markCellAtIndex(i, gameBoard.getLesserMark())
+            # Calculate score
+            moveScorePairs.append((i, self.simulateMinMax(gameBoard, 1)))
+            # Revert candidate move
+            gameBoard.cells[i].marker = CellMark.EMPTY
 
         if len(moveScorePairs) == 0: return False
 
         movesSortedByCost = sorted(moveScorePairs, key=lambda item: item[1][1])
         bestMove = min(movesSortedByCost, key=lambda item: item[1][0])
         return gameBoard.markCellAtIndex(bestMove[0], self.playerMarker)
-    
-    """
-    Creates a deep copy of the given gameBoard and marks the cell specified by cellIndex in the copy.
-    @return deep copy of gameBoard with cellIndex marked based on whoever the active player is in the simulation.
-    """
-    def createBoardWithSimulatedMove(self, gameBoard: GameBoard, cellIndex: int) -> GameBoard:
-        # Create a copy of the game board so we don't overwrite the real one.
-        copiedBoard = GameBoard(gameBoard.gridSize, gameBoard.padding)
-        copiedBoard.reset()
-        for i in range(len(gameBoard.cells)):
-            copiedBoard.cells[i].mark(gameBoard.cells[i].marker)
-
-        activeMarker = copiedBoard.getLesserMark()
-        copiedBoard.markCellAtIndex(cellIndex, activeMarker)
-        return copiedBoard
     
     """
     Utility function that simulates the minmax starting at level 1. This function will recurse until it reaches an end condition. See grade().
@@ -72,9 +61,13 @@ class AIPlayer(Player):
         scoreCostPairs = []
         for i in range(len(gameBoard.cells)):
             if not gameBoard.cells[i].isMarkEmpty(): continue
-            simulatedBoard = self.createBoardWithSimulatedMove(gameBoard, i)
-            scoreCostPairs.append(self.simulateMinMax(simulatedBoard, cost + 1))
-        
+            # Mark board with candidate move
+            gameBoard.markCellAtIndex(i, gameBoard.getLesserMark())
+            # Calculate score
+            scoreCostPairs.append(self.simulateMinMax(gameBoard, cost + 1))
+            # Revert candidate move
+            gameBoard.cells[i].marker = CellMark.EMPTY
+
         best = scoreCostPairs[0]
         currentMarker = gameBoard.getLesserMark()
         # Calculate min score for AI

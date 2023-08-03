@@ -27,7 +27,6 @@ class GameBoard(IDrawable):
         self.gridSize = size
         self.padding = padding
 
-
     """
     Resets the game board by recreated the cells that compose the grid.
     """
@@ -53,6 +52,8 @@ class GameBoard(IDrawable):
     @returns bool True if the cell was successfully marked.
     """
     def markCellAtIndex(self, index: int, marker: CellMark) -> bool:
+        if index < 0 or index > len(self.cells):
+            return False
         return self.cells[index].mark(marker)
     
     """
