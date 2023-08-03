@@ -12,7 +12,10 @@ class AIPlayer(Player):
     @returns bool True if the move was successfully executed, false otherwise.
     """
     def doMove(self, gameBoard: GameBoard) -> bool:
+        # Uncomment this line for easy difficulty for AI
         #return self.doNaiveMove(gameBoard)
+
+        # Comment this line out if you uncomment the line above.
         return self.doExpertMove(gameBoard)
     
     """
