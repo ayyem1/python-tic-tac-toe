@@ -13,7 +13,7 @@ Python 3.9.6
 1. GUI built with pygame
 2. AI plays against you using minmax algorithm. You can toggle difficulty in code (see below)
 3. Win/Lose/Draw text is show on game over
-4. You can restart the game at any time using the 'r' key on your keyboard
+4. You can restart the game at any time by pressing the restart button.
 
 ## Future Additions
 1. Optimize minmax with AB pruning
