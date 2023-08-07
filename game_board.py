@@ -109,7 +109,7 @@ class GameBoard(IDrawable):
     @returns bool True if all cells have been marked with something other than CellMark.EMPTY.
     """
     def isBoardFilled(self) -> bool:
-        return len(self.getAllCellsWithMark(CellMark.EMPTY)) == 0
+        return len(self.getAvailableGridIndices()) == 0
     
     """
     @returns Either CellMark.X or CellMark.O depending on which has fewer instances on the board
@@ -127,6 +127,9 @@ class GameBoard(IDrawable):
     """
     def getAllCellsWithMark(self, marker: CellMark) -> list[Cell]:
         return list(filter(lambda cell: cell.marker == marker, self.cells))
+    
+    def getAvailableGridIndices(self) -> list[int]:
+        return list(filter(lambda cellIndex: self.cells[cellIndex].isMarkEmpty(), range(len(self.cells))))
     
     #region IDrawable implementation
     """

@@ -1,13 +1,18 @@
 from cell_mark import CellMark
 from idrawable import IDrawable
+
 import pygame
 
 """
 Represents a single cell on the game board and has logic to render its state.
 """
 class Cell(IDrawable):
+    # The amount of padding between the border of the cell and drawing of the marker (X or O)
+    RENDER_PADDING = 5
+
     def __init__(self, start, end, width, height) -> None:
         self.bounds = pygame.Rect(start, end, width, height)
+        self.renderBounds = pygame.Rect(start + self.RENDER_PADDING, end + self.RENDER_PADDING, width - (self.RENDER_PADDING * 2), height - (self.RENDER_PADDING * 2))
         self.marker = CellMark.EMPTY
     
     """
@@ -41,15 +46,15 @@ class Cell(IDrawable):
     Utility to draw an X on the screen.
     """
     def drawX(self, screen, color: tuple[int]) -> None:
-        pygame.draw.aaline(screen, color, self.bounds.topleft, self.bounds.bottomright)
-        pygame.draw.aaline(screen, color, self.bounds.topright, self.bounds.bottomleft)
+        pygame.draw.aaline(screen, color, self.renderBounds.topleft, self.renderBounds.bottomright)
+        pygame.draw.aaline(screen, color, self.renderBounds.topright, self.renderBounds.bottomleft)
         return
     
     """
     Utility to draw an O on the screen.
     """
     def drawO(self, screen, color: tuple[int]) -> None:
-        pygame.draw.circle(screen, color, self.bounds.center, self.bounds.width / 2, 1)
+        pygame.draw.circle(screen, color, self.renderBounds.center, self.renderBounds.width / 2, 1)
         return
     
     #endregion

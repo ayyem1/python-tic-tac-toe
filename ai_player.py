@@ -12,24 +12,23 @@ class AIPlayer(Player):
     @returns bool True if the move was successfully executed, false otherwise.
     """
     def doMove(self, gameBoard: GameBoard) -> bool:
-        # Uncomment this line for easy difficulty for AI
-        #return self.doNaiveMove(gameBoard)
+        #NOTE: Only one of these two lines should be enabled
+        return self.doNaiveMove(gameBoard) # This line enables easy difficulty for AI
+        #return self.doExpertMove(gameBoard) # This line enables hard difficulty for AI
 
-        # Comment this line out if you uncomment the line above.
-        return self.doExpertMove(gameBoard)
-    
     """
     This method will select a random cell from the remaining empty cells,
     and mark it.
     @returns bool True if the move was successfully executed, false otherwise.
     """
     def doNaiveMove(self, gameBoard: GameBoard) -> bool:
-        availableCells = gameBoard.getAllCellsWithMark(CellMark.EMPTY)
+        availableCells = gameBoard.getAvailableGridIndices()
         if len(availableCells) == 0:
             return False
         
-        return gameBoard.markCellAtIndex(random.choice(range(len(availableCells))), self.playerMarker)
-    
+        choice = random.choice(range(len(availableCells)))
+        return gameBoard.markCellAtIndex(availableCells[choice], self.playerMarker)
+
     """
     This method will use the minmax algorithm to determine the best possible move to take.
     @returns bool True if the move was successfully executed, false otherwise.
@@ -51,7 +50,7 @@ class AIPlayer(Player):
         movesSortedByCost = sorted(moveScorePairs, key=lambda item: item[1][1])
         bestMove = min(movesSortedByCost, key=lambda item: item[1][0])
         return gameBoard.markCellAtIndex(bestMove[0], self.playerMarker)
-    
+
     """
     Utility function that simulates the minmax starting at level 1. This function will recurse until it reaches an end condition. See grade().
     @returns tuple where the first element is the grade for the given board and the second element is the cost it took to get to there.
@@ -60,7 +59,7 @@ class AIPlayer(Player):
         boardGrade = self.grade(gameBoard)
         if boardGrade != None:
             return (boardGrade, cost)
-        
+
         scoreCostPairs = []
         for i in range(len(gameBoard.cells)):
             if not gameBoard.cells[i].isMarkEmpty(): continue
@@ -85,7 +84,7 @@ class AIPlayer(Player):
                     best = pair
 
         return best
-    
+
     """
     @returns a nullable score based on the given board. None will be returned if there is no winner, 0 if there is a draw, 10 if the player wins, -10 if the AI wins.
     """
