@@ -1,8 +1,9 @@
 from ai_player import AIPlayer
 from cell_mark import CellMark
 from game_board import GameBoard
-from idrawable import IDrawable
 from player import Player
+
+import pygame
 
 """
 Represents a game of tic tac toe. 
@@ -14,6 +15,8 @@ class Game:
     RED = (255, 0, 0)
     GREEN = (0, 255, 0)
     BLUE = (0, 0, 255)
+    DARK_GREY = (128,128,128)
+    GREY = (169,169,169)
 
     def __init__(self, screenSize: tuple[float], padding: tuple[float]) -> None:
         self.screenSize = screenSize
@@ -23,7 +26,27 @@ class Game:
         self.player = Player(CellMark.X)
         self.opponent = AIPlayer(CellMark.O)
 
-        self.resetGame()
+        self.restartGame()
+
+        self.infoTextRect = None
+    
+    def onMouseButtonPressed(self, mousePos: tuple[float]) -> None:
+        x, y = mousePos
+        if self.infoTextRect.collidepoint(x, y):
+            self.restartGame()
+            return
+
+    def restartGame(self) -> None:
+        self.gameBoard.reset()
+        self.isOver = False
+        self.winner = CellMark.EMPTY
+        
+    def nextTurn(self) -> None:
+        if self.isOver:
+            return
+
+        self.getActivePlayer().doMove(self.gameBoard)
+        self.checkForGameOver()
 
     def getActivePlayer(self) -> Player:
         lesserMark = self.gameBoard.getLesserMark()
@@ -31,11 +54,6 @@ class Game:
             return self.player
         else:
             return self.opponent
-    
-    def nextTurn(self) -> None:
-        if self.isOver: return
-        self.getActivePlayer().doMove(self.gameBoard)
-        self.checkForGameOver()
 
     def checkForGameOver(self):
         winner = self.gameBoard.getWinner()
@@ -48,21 +66,24 @@ class Game:
         elif winner == self.opponent.playerMarker:
             self.winner = self.opponent.playerMarker
             self.isOver = True
-        
-    def resetGame(self) -> None:
-        self.gameBoard.reset()
-        self.isOver = False
-        self.winner = CellMark.EMPTY
 
     def render(self, screen, gameOverFont, infoFont) -> None:
-        infoText = infoFont.render('(Press \'r\' at any point to restart)', True, self.BLACK)
-
         screen.fill(self.WHITE)
         self.gameBoard.draw(screen, self.BLACK)
 
-        infoTextRect = infoText.get_rect()
-        infoTextRect.center = (self.screenSize[0] / 2, self.screenSize[1] - (self.padding[1] / 2))
-        screen.blit(infoText, infoTextRect)
+        infoText = infoFont.render('Restart', True, self.BLACK)
+
+        self.infoTextRect = infoText.get_rect()
+        self.infoTextRect.center = (self.screenSize[0] / 2, self.screenSize[1] - (self.padding[1] / 2))
+
+        # Handle the player hovering over the restart button.
+        mouseX, mouseY = pygame.mouse.get_pos()
+        if self.infoTextRect.collidepoint(mouseX, mouseY):
+            pygame.draw.rect(screen, self.DARK_GREY, self.infoTextRect)
+        else:
+            pygame.draw.rect(screen, self.GREY, self.infoTextRect)
+
+        screen.blit(infoText, self.infoTextRect)
 
         if (self.isOver):
             gameOverText = None

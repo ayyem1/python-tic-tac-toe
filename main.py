@@ -11,7 +11,7 @@ screen = pygame.display.set_mode(SCREENSIZE)
 pygame.display.set_caption("Tic Tac Toe")
 
 # Create Fonts
-infoFont = pygame.font.Font('freesansbold.ttf', 16)
+infoFont = pygame.font.Font('freesansbold.ttf', 25)
 gameOverFont = pygame.font.Font('freesansbold.ttf', 40)
 
 # Create new game instance
@@ -27,8 +27,8 @@ while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
-        if event.type == pygame.KEYUP and event.key == pygame.K_r:
-            game.resetGame()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            game.onMouseButtonPressed(pygame.mouse.get_pos())
 
     game.nextTurn()
 

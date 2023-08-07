@@ -19,3 +19,4 @@ class Player:
         if pygame.mouse.get_pressed()[0]:
             result = gameBoard.markCellThatCollidesWithPoint(pygame.mouse.get_pos(), self.playerMarker)
         return result
+    
