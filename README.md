@@ -27,12 +27,10 @@ Python 3.9.6
 1. Open `ai_player.py`
 2. Uncomment the line that corresponds to the dificulty you want
 ```
-  def doMove(self, gameBoard: GameBoard) -> bool:
-      # Uncomment this line for easy difficulty for AI
-      #return self.doNaiveMove(gameBoard)
-
-      # Comment this line out if you uncomment the line above.
-      return self.doExpertMove(gameBoard)
+    def doMove(self, gameBoard: GameBoard) -> bool:
+        #NOTE: Only one of these two lines should be enabled
+        return self.doNaiveMove(gameBoard) # This line enables easy difficulty for AI
+        #return self.doExpertMove(gameBoard) # This line enables hard difficulty for AI
 ```
 3. Save
 4. Run `python3 main.py`
